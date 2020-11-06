@@ -17,40 +17,24 @@ import {
 import PostCard from "./../components/PostCard";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import { AuthContext } from "../providers/AuthProvider";
-import { getPosts } from "./../requests/Posts";
-import { getUsers } from "./../requests/Users";
+import { getDataJSON, storeDataJSON, removeData } from "../functions/AsyncStorageFunctions";
+import moment from "moment";
 
 const HomeScreen = (props) => {
-  const [posts, setPosts] = useState([]);
-  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [postList, setPostList] = useState([]);
+  const [postBody, setPostBody] = useState("");
 
-  const loadPosts = async () => {
-    setLoading(true);
-    const response = await getPosts();
-    if (response.ok) {
-      setPosts(response.data);
-    }
-  };
-
-  const loadUsers = async () => {
-    const response = await getUsers();
-    if (response.ok) {
-      setUsers(response.data);
-    }
-    setLoading(false);
-  };
-  const getName = (id) => {
-    let Name = "";
-    users.forEach((element) => {
-      if (element.id == id) Name = element.name;
+  const getData = async () => {
+    await getDataJSON("posts").then((data) => {
+      if (data == null) {
+        setPostList([]);
+      } else setPostList(data);
     });
-    return Name;
   };
 
   useEffect(() => {
-    loadPosts();
-    loadUsers();
+    getData();
   }, []);
 
   if (!loading) {
@@ -66,7 +50,7 @@ const HomeScreen = (props) => {
                   props.navigation.toggleDrawer();
                 },
               }}
-              centerComponent={{ text: "The Office", style: { color: "#fff" } }}
+              centerComponent={{ text: "Blog App", style: { color: "#fff" } }}
               rightComponent={{
                 icon: "lock-outline",
                 color: "#fff",
@@ -80,21 +64,49 @@ const HomeScreen = (props) => {
               <Input
                 placeholder="What's On Your Mind?"
                 leftIcon={<Entypo name="pencil" size={24} color="black" />}
+                onChangeText={function(currentInput){
+                  setPostBody(currentInput); 
+               }}
               />
-              <Button title="Post" type="outline" onPress={function () {}} />
-            </Card>
-
-            <FlatList
-              data={posts}
-              renderItem={function ({ item }) {
-                return (
-                  <PostCard
-                    author={getName(item.userId)}
-                    title={item.title}
-                    body={item.body}
-                  />
-                );
+              <Button title="Post" type="outline" onPress={async function () {
+                  let arr = [
+                    ...postList,
+                    {
+                      name: auth.CurrentUser.name,
+                      email: auth.CurrentUser.email,
+                      date: moment().format("DD MMM, YYYY"),
+                      likes : [],
+                      post: postBody,
+                      key: postBody,
+                    },
+                  ];
+  
+                  await storeDataJSON("posts", arr).then(() => {
+                    setPostList(arr);
+                  });
+  
+                  alert("Post Successful!");
+                  setPostBody("");
+              }} />
+              <Button
+              buttonStyle={{ borderColor: "#29435c" }}
+              title="Delete Post"
+              titleStyle={{ color: "#29435c" }}
+              type="outline"
+              onPress={async function () {
+                await removeData("posts");
               }}
+            />
+            </Card>
+            <FlatList
+            data={postList}
+            renderItem={(postItem)=>(
+              <PostCard
+                    author={postItem.item.name}
+                    title={postItem.item.date}
+                    body={postItem.item.post}
+                  />
+            )}
             />
           </View>
         )}
