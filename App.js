@@ -12,16 +12,29 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 
 import {AuthContext, AuthProvider} from './src/providers/AuthProvider';
 import { Entypo, AntDesign, Ionicons } from "@expo/vector-icons";
+import EditProfileScreen from './src/screens/EditProfileScreen';
+import CommentScreen from './src/screens/CommentScreen';
 
 const AuthStack = createStackNavigator();
 const HomeTab = createMaterialBottomTabNavigator();
 const AppDrawer = createDrawerNavigator();
+const ProfileStack = createStackNavigator();
+const HomeStack = createStackNavigator();
 
+
+const ProfileStackScreen = () =>{
+  return(
+    <ProfileStack.Navigator initialRouteName='Profile'>
+      <ProfileStack.Screen name = 'Profile' component={ProfileScreen} options={{headerShown: false}}/>
+      <ProfileStack.Screen name = 'EditProfile' component={EditProfileScreen} options={{headerShown: false}}/>
+    </ProfileStack.Navigator>
+  )
+}
 const AppDrawerScreen = () => {
   return (
     <AppDrawer.Navigator>
-      <AppDrawer.Screen name="Home" component={HomeTabScreen} />
-      <AppDrawer.Screen name="Profile" component={ProfileScreen} />
+      <AppDrawer.Screen name="Home" component={HomeStackScreen} />
+      <AppDrawer.Screen name="Profile" component={ProfileStackScreen} />
     </AppDrawer.Navigator>
   );
 };
@@ -55,6 +68,15 @@ const HomeTabScreen = ()=>{
       }}/>
     </HomeTab.Navigator>
   );
+}
+
+const HomeStackScreen = () =>{
+  return(
+    <HomeStack.Navigator initialRouteName='Home'>
+      <HomeStack.Screen name='Home' component={HomeTabScreen} options={{headerShown: false}}/>
+      <HomeStack.Screen name='Comment' component={CommentScreen} options={{headerShown: false}}/>
+    </HomeStack.Navigator>
+  )
 }
 
 const AuthStackScreen = ()=>{

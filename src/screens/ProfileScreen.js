@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet, AsyncStorage, Image } from "react-native";
 import { Text, Card, Button, Avatar, Header } from "react-native-elements";
+import { FontAwesome5 } from '@expo/vector-icons';
 import { AuthContext } from "../providers/AuthProvider";
 import { AntDesign } from '@expo/vector-icons';
 
@@ -33,6 +34,16 @@ const ProfileScreen = (props) => {
                     <Card>
                         <Image style={styles.profImage} source={require('../../assets/profilePhoto.png')} />
                         <Text style={styles.userNameStyle}>{auth.CurrentUser.name}</Text>
+                        <Button
+                            type="solid"
+                            title=" Edit Account "
+                            icon={<FontAwesome5 name="user-edit" size={24} color="white" />}
+                            onPress={
+                                function(){
+                                    props.navigation.navigate('EditProfile');
+                                }
+                            }
+                        />
                         <Button
                             icon={<AntDesign name="deleteuser" size={24} color="white" />}
                             title=" Delete Profile"

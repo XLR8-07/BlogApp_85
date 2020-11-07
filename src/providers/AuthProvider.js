@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
+import { getDataJSON } from "../functions/AsyncStorageFunctions";
 
 const AuthContext = React.createContext();
 
 const AuthProvider = (props)=>{
     const [CurrentUser, setCurrentUser] = useState({});
     const [IsLoggedIn, setIsLoggedIn] = useState(false);
+    
 
     return (
         <AuthContext.Provider
@@ -13,6 +15,7 @@ const AuthProvider = (props)=>{
             setCurrentUser: setCurrentUser,
             IsLoggedIn: IsLoggedIn,
             setIsLoggedIn: setIsLoggedIn,
+            
           }}
         >
           {props.children}

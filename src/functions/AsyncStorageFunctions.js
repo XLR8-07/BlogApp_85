@@ -54,4 +54,23 @@ const removeData = async (key) => {
   }
 };
 
-export { storeData, storeDataJSON, getData, getDataJSON, removeData };
+const getAllindex= async()=>{
+  let keys=[]
+  try{
+      keys = await AsyncStorage.getAllKeys();
+          return keys;
+      
+  }catch(error){
+      alert(error);
+  }
+}
+
+const mergeData= async(key, value)=>{
+  try{
+      await AsyncStorage.mergeItem(key, value);
+  }catch(error){
+      alert(error);
+  }
+}
+
+export { storeData, storeDataJSON, getData, getDataJSON, removeData, getAllindex, mergeData };
