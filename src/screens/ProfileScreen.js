@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, StyleSheet, AsyncStorage, Image } from "react-native";
 import { Text, Card, Button, Avatar, Header } from "react-native-elements";
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -21,7 +21,7 @@ const ProfileScreen = (props) => {
                                 props.navigation.toggleDrawer();
                             },
                         }}
-                        centerComponent={{ text: "The Office", style: { color: "#fff" } }}
+                        centerComponent={{ text: "Blog App", style: { color: "#fff" } }}
                         rightComponent={{
                             icon: "lock-outline",
                             color: "#fff",

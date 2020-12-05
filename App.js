@@ -3,6 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import * as firebase from 'firebase';
 
 import HomeScreen from './src/screens/HomeScreen';
 import NotificationScreen from './src/screens/NotificationScreen';
@@ -20,6 +21,19 @@ const HomeTab = createMaterialBottomTabNavigator();
 const AppDrawer = createDrawerNavigator();
 const ProfileStack = createStackNavigator();
 const HomeStack = createStackNavigator();
+
+
+var firebaseConfig = {
+  apiKey: "AIzaSyCKUtGDSaIyHRwXOkhgEOzIjMIAEpOe4Ig",
+  authDomain: "blogapp85-59c18.firebaseapp.com",
+  projectId: "blogapp85-59c18",
+  storageBucket: "blogapp85-59c18.appspot.com",
+  messagingSenderId: "846554695467",
+  appId: "1:846554695467:web:88498d32c89fa1ebbfa76e"
+};
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
 
 
 const ProfileStackScreen = () =>{

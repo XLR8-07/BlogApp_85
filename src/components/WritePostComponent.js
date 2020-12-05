@@ -1,7 +1,7 @@
 import React,{useReducer, useState} from "react";
 import { View } from "react-native";
 import { Card, Button, Text, Avatar,   Input } from "react-native-elements";
-import {storeDataJson} from '../functions/AsyncStorageFunctions';
+import {storeDataJSON} from '../functions/AsyncStorageFunctions';
 import { Entypo } from "@expo/vector-icons";
 
 
@@ -35,7 +35,7 @@ const WritePostComponent = (props) => {
                 likecount: 0,
                 commentcount: 0,
             };
-            storeDataJson("pid#"+id+props.user.name, newpost);
+            storeDataJSON("pid#"+id+props.user.name, newpost);
             }else{
             alert("Must enter any character");
             }
