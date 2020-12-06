@@ -3,6 +3,7 @@ import {View, StyleSheet} from 'react-native';
 import {Input, Button, Card} from 'react-native-elements'
 import { Fontisto, AntDesign, Octicons, FontAwesome } from '@expo/vector-icons';
 import * as firebase from 'firebase';
+import 'firebase/firestore';
 
 const SignUpScreen = (props)=>{
     const [Name, setName] = useState("");
@@ -47,14 +48,42 @@ const SignUpScreen = (props)=>{
                 icon={<Octicons name="sign-in" size={24} color="black" />}
                 title='Sign Up!'
                 type='outline'
-                onPress={function(){
-                    if(Name && SID && Email && Password){
-                        firebase.auth().createUserWithEmailAndPassword()
+                onPress={() => {
+                    if (Name && SID && Email && Password) {
+                    //   setIsLoading(true);
+                      firebase
+                        .auth()
+                        .createUserWithEmailAndPassword(Email, Password)
+                        .then((userCreds) => {
+                          userCreds.user.updateProfile({ displayName: Name });
+                          firebase
+                            .firestore()
+                            .collection("users")
+                            .doc(userCreds.user.uid)
+                            .set({
+                              name: Name,
+                              sid: SID,
+                              email: Email,
+                            })
+                            .then(() => {
+                            //   setIsLoading(false);
+                              alert("Account created successfully!");
+                              console.log(userCreds.user);
+                              props.navigation.navigate("SignIn");
+                            })
+                            .catch((error) => {
+                            //   setIsLoading(false);
+                              alert(error);
+                            });
+                        })
+                        .catch((error) => {
+                        //   setIsLoading(false);
+                          alert(error);
+                        });
+                    } else {
+                      alert("Fields can not be empty!");
                     }
-                    else{
-                        alert("Fields cannot be empty!");
-                    }
-                }}
+                  }}
                 />
 
                 <Button

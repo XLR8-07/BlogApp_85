@@ -3,6 +3,9 @@ import { View } from "react-native";
 import { Card, Button, Text, Avatar,   Input } from "react-native-elements";
 import {storeDataJSON} from '../functions/AsyncStorageFunctions';
 import { Entypo } from "@expo/vector-icons";
+import { AuthContext } from "../providers/AuthProvider"
+import * as firebase from "firebase";
+import "firebase/firestore";
 
 
 const WritePostComponent = (props) => {
@@ -11,39 +14,47 @@ const WritePostComponent = (props) => {
     let today = new Date().toLocaleDateString();
     let currenttime = new Date().toLocaleTimeString();
   return (
-    <Card>
-    <Input
-        ref={input}
-        placeholder="What's On Your Mind?"
-        leftIcon={<Entypo name="pencil" size={24} color="gray" />}
-        onChangeText={
-        function(currentinput){
-                setPost(currentinput);
-        }
-    }
-    />
-    <Button title="Post" type="outline" onPress={
-        function(){
-            if(Post.size!=0){
-            const id=Math.ceil(Math.random()*1000000000000000);
-            let newpost = {
-                pid: "pid#"+id+props.user.name,
-                post: Post,
-                uname: props.user.name,
-                date: today,
-                time: currenttime,
-                likecount: 0,
-                commentcount: 0,
-            };
-            storeDataJSON("pid#"+id+props.user.name, newpost);
-            }else{
-            alert("Must enter any character");
+    <AuthContext.Consumer>
+    {(auth)=>{
+        <Card>
+        <Input
+            ref={input}
+            placeholder="What's On Your Mind?"
+            leftIcon={<Entypo name="pencil" size={24} color="gray" />}
+            onChangeText={
+            function(currentinput){
+                    setPost(currentinput);
             }
-        setPost("");
-        input.current.clear(); 
         }
-    } />
-  </Card>
+        />
+        <Button title="Post" type="outline" onPress={
+            function(){
+                firebase
+                      .firestore()
+                      .collection("posts")
+                      .add({
+                        userId: auth.CurrentUser.uid,
+                        body: input,
+                        author: auth.CurrentUser.displayName,
+                        created_at: firebase.firestore.Timestamp.now(),
+                        likes: [],
+                        comments: [],
+                      })
+                      .then(() => {
+                        // setLoading(false);
+                        alert("Post created Successfully!");
+                      })
+                      .catch((error) => {
+                        // setLoading(false);
+                        alert(error);
+                      });
+            // setPost("");
+            // input.current.clear(); 
+            }
+        } />
+      </Card>
+    }}
+    </AuthContext.Consumer>
   );
 };
 

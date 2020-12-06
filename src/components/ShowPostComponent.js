@@ -4,13 +4,17 @@ import { View } from "react-native";
 import { Card, Button, Text, Avatar } from "react-native-elements";
 import {storeDataJSON, mergeData, removeData} from '../functions/AsyncStorageFunctions';
 import { AntDesign } from "@expo/vector-icons";
+import * as firebase from "firebase";
+import "firebase/firestore";
 
 const ShowPostComponent = (props) => {
-  const [Like, setLike]=useState(props.title.likecount);
-  let like=" ("+props.title.likecount+")";
+  console.log(props);
+  // const [Like, setLike]=useState(props.title.likecount);
+  let like=" ("+props.like+")";
   const comment="Comment";
   let today = new Date().toLocaleDateString();
   let currenttime = new Date().toLocaleTimeString();
+  let likeArray = [];
   
   return (
     <Card>
@@ -27,43 +31,58 @@ const ShowPostComponent = (props) => {
           activeOpacity={1}
         />
         <Text h4Style={{ padding: 10 }} h4>
-          {props.title.uname}
+          {props.user}
         </Text>
         </View>
         <Text h6Style={{ padding: 10}} h6 style={{alignSelf:"stretch",color:'gray'}}>
-          <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Posted at: </Text>{props.title.time}, {props.title.date}
+          <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Posted at: </Text>{props.created_at}
         </Text>
       <Text
         style={{
           paddingVertical: 10,
         }}
       >
-        {props.title.post}
+        {props.body}
       </Text>
       <Card.Divider />
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Button
           type="outline"
-          title={like} 
+          title={props.likecount} 
           icon={<AntDesign name="heart" size={24} color="dodgerblue" />}
           onPress={
            async function(){
-                let lcount=(Like+1)
-                await mergeData(props.title.pid,JSON.stringify({likecount: lcount}))
-                const id=Math.ceil(Math.random()*1000000000000000);
-                let newnotification = {
-                    pid: props.title.pid,
-                    nid: "nid#"+id+props.title.pid,
-                    author: props.title.uname,
-                    uname: props.user.name,
-                    date: today,
-                    time: currenttime,
-                    type: "like",
-                }
-                storeDataJSON("nid#"+id+props.title.pid, newnotification);
-                console.log(newnotification);
-                console.log(props.title);
-                setLike(Like+1);
+                likeArray.push(props.user);
+                console.log("WORKING!");
+                firebase
+                .firestore()
+                .collection('posts')
+                .doc(props.id)
+                .update({
+                  likes:likeArray
+                })
+                .then(()=>{
+                  console.log("LIKED BY"+props.user);
+                })
+                .catch((error)=>{
+                  alert(error);
+                });
+                // let lcount=(Like+1)
+                // await mergeData(props.title.pid,JSON.stringify({likecount: lcount}))
+                // const id=Math.ceil(Math.random()*1000000000000000);
+                // let newnotification = {
+                //     pid: props.title.pid,
+                //     nid: "nid#"+id+props.title.pid,
+                //     author: props.title.uname,
+                //     uname: props.user.name,
+                //     date: today,
+                //     time: currenttime,
+                //     type: "like",
+                // }
+                // storeDataJSON("nid#"+id+props.title.pid, newnotification);
+                // console.log(newnotification);
+                // console.log(props.title);
+                // setLike(Like+1);
               }
         }
         />

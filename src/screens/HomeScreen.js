@@ -9,33 +9,40 @@ import {
   Header,
 } from "react-native-elements";
 import ShowPostComponent from "../components/ShowPostComponent";
+import { Entypo } from "@expo/vector-icons";
 import WritePostComponent from "../components/WritePostComponent";;
 import {getDataJSON, getAllindex} from '../functions/AsyncStorageFunctions';
-import { AuthContext } from "../providers/AuthProvider"
+import { AuthContext } from "../providers/AuthProvider";
+import * as firebase from "firebase";
+import "firebase/firestore";
 
 
 const HomeScreen = (props) => {
 
   const [Post, setPost]=useState([]);
   const [Render, setRender]=useState(false);
+  const input = React.createRef();
   const getPost = async () =>{
     setRender(true);
-    let keys=await getAllindex();
-    let Allposts=[];
-    if(keys!=null){
-      for (let k of keys){
-          if(k.startsWith("pid#")){
-            let post= await getDataJSON(k);
-            Allposts.push(post);
-          }
-        }
-        setPost(Allposts);
-      }
-      else{
-        console.log("No post to show");
-      }
-      setRender(false);
-    }
+    firebase
+      .firestore()
+      .collection("posts")
+      .onSnapshot((querySnapshot) => {
+        let temp_posts = [];
+        querySnapshot.forEach((doc) => {
+          temp_posts.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+        setPost(temp_posts);
+        setRender(false);
+      })
+      .catch((error) => {
+        setRender(false);
+        alert(error);
+      });
+  }
 
   useEffect(()=>{
     getPost();
@@ -59,13 +66,49 @@ const HomeScreen = (props) => {
               icon: "lock-outline",
               color: "#fff",
               onPress: function () {
-                auth.setIsLoggedIn(false);
+                auth.setIsLoggedIn(false);``
                 auth.setCurrentUser({});
               },
             }}/>
 
           
-          <WritePostComponent user={auth.CurrentUser}/>
+          <Card>
+        <Input
+            ref={input}
+            placeholder="What's On Your Mind?"
+            leftIcon={<Entypo name="pencil" size={24} color="gray" />}
+            onChangeText={
+            function(currentinput){
+                    setPost(currentinput);
+            }
+        }
+        />
+        <Button title="Post" type="outline" onPress={
+            function(){
+                firebase
+                      .firestore()
+                      .collection("posts")
+                      .add({
+                        userId: auth.CurrentUser.uid,
+                        body: Post,
+                        author: auth.CurrentUser.displayName,
+                        created_at: firebase.firestore.Timestamp.now(),
+                        likes: [],
+                        comments: [],
+                      })
+                      .then(() => {
+                        // setLoading(false);
+                        alert("Post created Successfully!");
+                      })
+                      .catch((error) => {
+                        // setLoading(false);
+                        alert(error);
+                      });
+            // setPost("");
+            // input.current.clear(); 
+            }
+        } />
+      </Card>
 
           <FlatList
           data={Post}
@@ -73,7 +116,7 @@ const HomeScreen = (props) => {
           refreshing={Render}
           renderItem={function({item}){
             return(
-              <ShowPostComponent title={item} user={auth.CurrentUser} link={props.navigation}
+              <ShowPostComponent body={item.data.body} user={item.data.author} link={props.navigation} created_at={item.data.created_at.toDate().toLocaleDateString("en-US")} likecount={item.data.likes.length} id={item.id}
               />
             );
           }}
