@@ -8,6 +8,8 @@ import WriteCommentComponent from "../components/WriteCommentComponent";
 import ShowCommentComponent from "../components/ShowCommentComponent";
 import {getDataJson, getAllindex} from '../functions/AsyncStorageFunctions';
 import { AuthContext } from "../providers/AuthProvider";
+import * as  firebase from "firebase";
+import "firebase/firestore";
 
 
 const CommentScreen = (props) => {
@@ -17,21 +19,43 @@ const CommentScreen = (props) => {
   const [Render, setRender]=useState(false);
   const getComment = async () =>{
     setRender(true);
-    let keys=await getAllindex();
-    let Allcomments=[];
-    if(keys!=null){
-      for (let k of keys){
-          if(k.startsWith("cid#") && k.endsWith(content.pid)){
-            let comments= await getDataJson(k);
-            Allcomments.push(comments);
-          }
-        }
-        setComment(Allcomments);
-      }
-      else{
-        console.log("No post to show");
-      }
+    
+    firebase
+    .firestore()
+    .collection('posts')
+    .doc(props.id)
+    .get()
+    .then((querySnapShot)=>{
+      let temp_comments = [];
+      querySnapShot.forEach((doc)=>{
+        temp_comments.push({
+          id : doc.id,
+          data : doc.data
+        });
+      });
+      setComment(temp_comments); 
       setRender(false);
+    })
+    .catch((error)=>{
+      setRender(false);
+      alert(error);
+
+    })
+    // let keys=await getAllindex();
+    // let Allcomments=[];
+    // if(keys!=null){
+    //   for (let k of keys){
+    //       if(k.startsWith("cid#") && k.endsWith(content.pid)){
+    //         let comments= await getDataJson(k);
+    //         Allcomments.push(comments);
+    //       }
+    //     }
+    //     setComment(Allcomments);
+    //   }
+    //   else{
+    //     console.log("No post to show");
+    //   }
+    //   setRender(false);
     }
 
   useEffect(()=>{
@@ -62,7 +86,7 @@ const CommentScreen = (props) => {
             }}/>
  
 
-          <WriteCommentComponent user={auth.CurrentUser} postcontent={content}/>
+          <WriteCommentComponent user={auth.CurrentUser} postcontent={Comment}/>
 
           <FlatList
           data={Comment}

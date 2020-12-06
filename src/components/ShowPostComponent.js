@@ -88,7 +88,7 @@ const ShowPostComponent = (props) => {
         />
         <Button type="solid" title={comment} onPress={
           function(){
-            props.link.navigate('Comment',{content: props.title});
+            props.link.navigate('Comment',{content: props.title, id:props.id});
           }
         }/>
 
