@@ -12,39 +12,17 @@ import "firebase/firestore";
 
 
 const CommentScreen = (props) => {
-  console.log(props);
+  // console.log(props);
   const [Comment, setComment]=useState([]);
   const [Render, setRender]=useState(false);
 
   
   const getComment = async () =>{
-    setRender(true);
-    setComment(props.route.params.data.comments);
-    console.log(Comment);
-    if(Comment.length == 0){
-      setRender(false);
-      alert("No Comment on this post!");
-    }
-    else{
-      let temp_comments = [];
-      firebase
-      .firestore()
-      .collection('posts')
-      .doc(props.route.params.postID)
-      .get()
-      .then(snapshot =>{
-        console.log(snapshot);
-        snapshot.forEach(doc =>{
-          const data = doc.data();
-          console.log(data);
-          setRender(false);
-        });
-      })
-      .catch(error =>{
-        setRender(true);
-        console.log(error);
-      })
-    }
+    firebase.firestore().collection("posts").doc(props.route.params.postID).onSnapshot(function (doc) {
+      let temp_body = doc.data();
+      setComment(temp_body.comments.reverse())
+
+    });
     }
 
     useEffect(()=>{
@@ -85,7 +63,7 @@ const CommentScreen = (props) => {
           renderItem={function({item}){
             console.log(item);
             return(
-              <ShowCommentComponent comment={item} 
+              <ShowCommentComponent com={item} 
               />
             );
           }}

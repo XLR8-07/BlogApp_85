@@ -66,9 +66,11 @@ const WriteCommentComponent = (props) => {
             .collection('posts')
             .doc(props.postID)
             .update({ 
-              
-              comments : temp_comments,
-              
+              comments: firebase.firestore.FieldValue.arrayUnion({
+                commentor: props.user,
+                message: comment,
+                time: firebase.firestore.Timestamp.now(),
+              })
             })
 
         

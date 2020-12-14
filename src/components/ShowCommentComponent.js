@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { Card, Button, Text, Avatar } from "react-native-elements";
 
 const ShowCommentComponent = (props) => {
+  console.log(props.com.time);
   return (
     <Card>
       <View
@@ -12,10 +13,10 @@ const ShowCommentComponent = (props) => {
         }}
       >
         <Text h4Style={{ padding: 10 }} h4>
-          {props.title.uname}
+        {props.com.commentor}
         </Text>
         <Text h6Style={{ padding: 10}} h6 style={{alignSelf:"flex-end", color:'gray'}}>
-          ( {props.time}, {props.title.date} )
+           {props.com.time.toDate().toDateString().toString()} 
         </Text>
         </View>
       <Text
@@ -23,7 +24,7 @@ const ShowCommentComponent = (props) => {
           paddingVertical: 10,
         }}
       >
-        {props.title.comment}
+        {props.com.message}
       </Text>
     </Card>
   );

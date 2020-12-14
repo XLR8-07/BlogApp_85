@@ -8,7 +8,8 @@ import * as firebase from "firebase";
 import "firebase/firestore";
 
 const ShowPostComponent = (props) => {
-  // console.log(props);
+  const [Like, setLike] = useState(props.data.likes.length);
+  let like = " (" + Like + ")";
   const comment="Comment";
 
   
@@ -46,25 +47,13 @@ const ShowPostComponent = (props) => {
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Button
           type="outline"
-          title={props.data.likes.length.toString()} 
+          title={like} 
           icon={<AntDesign name="heart" size={24} color="dodgerblue" />}
           onPress={
             function(){
-                likeArray.push(props.currentUser);
-                console.log("WORKING!");
-                firebase
-                .firestore()
-                .collection('posts')
-                .doc(props.postID)
-                .update({
-                  likes:likeArray
-                })
-                .then(()=>{
-                  
-                })
-                .catch((error)=>{
-                  alert(error);
-                });
+              firebase.firestore().collection("posts").doc(props.postID).update({
+                likes: firebase.firestore.FieldValue.arrayUnion(props.currentUser)
+              });
               }
         }
         />
