@@ -2,17 +2,19 @@ import React,{useReducer, useState} from "react";
 import { View } from "react-native";
 import { Card, Button, Text, Avatar, Input } from "react-native-elements";
 import {storeDataJSON, mergeData} from '../functions/AsyncStorageFunctions';
+import { AuthContext } from "../providers/AuthProvider";
 import { Entypo } from "@expo/vector-icons";
+import * as firebase from "firebase";
+import "firebase/firestore";
 
 
 const WriteCommentComponent = (props) => {
-    const [Commentno, setCommentno]=useState(props.postcontent.commentcount);
-    const [Comment, setComment]=useState("");
-    const input = React.createRef();
-    let today = new Date().toLocaleDateString();
-    let currenttime = new Date().toLocaleTimeString();
+    console.log(props);
+    const [comment , setComment] = useState('');
+    let temp_comments = [];
 
   return (
+    
     <Card>
     <View style={{flexDirection: "row",alignItems: "center"}}>
         <Avatar
@@ -22,29 +24,28 @@ const WriteCommentComponent = (props) => {
           activeOpacity={1}
         />
         <Text h4Style={{ padding: 10 }} h4>
-         {props.postcontent.uname} 
+         {props.data.author} 
         </Text>
       </View>
       <Text h6Style={{ padding: 10 }} h6 style={{alignSelf:"stretch", color:'gray'}}>
-      <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Posted at: </Text>{props.postcontent.time}, {props.postcontent.date}
+      <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Posted at: </Text>{props.data.created_at.toDate().toDateString().toString()}
         </Text>
       <Text
         style={{
           paddingVertical: 10,
         }}
       >
-        {props.postcontent.post}
+        {props.data.body}
       </Text>
       <Text h6Style={{ padding: 10 }} h6 style={{color:'gray'}}>
-      <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Likes: </Text>{props.postcontent.likecount} 
-      <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}> , Comments: </Text>{props.postcontent.commentcount}
+      <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Likes: </Text>{props.data.likes.length.toString()} 
+      <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}> , Comments: </Text>{props.data.comments.length.toString()}
         </Text>
     <Card.Divider />
     <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
     <View style={{width:"75%"}}>
     <Input
 
-        ref={input}
         placeholder="Write Something"
         leftIcon={<Entypo name="pencil" size={24} color="gray" />}
         onChangeText={
@@ -57,39 +58,18 @@ const WriteCommentComponent = (props) => {
     <View style={{width:"25%",justifyContent: "center",marginBottom:20}}>
     <Button title="Comment" type="solid" onPress={
         async function(){
-            if(Comment.size!=0){
-            const id=Math.ceil(Math.random()*1000000000000000);
-            let newcomment = {
-                pid: props.postcontent.pid,
-                cid: "cid#"+id+props.postcontent.pid,
-                comment: Comment,
-                uname: props.user.name,
-                date: today,
-                time: currenttime,
-            }
-            storeDataJSON("cid#"+id+props.postcontent.pid, newcomment);
-            console.log(newcomment);
-            }else{
-            alert("Must enter any character");
-            }
-        setComment("");
-        input.current.clear(); 
-
-        let ccount=(Commentno+1)
-        await mergeData(props.postcontent.pid,JSON.stringify({commentcount: ccount}))
-        const id=Math.ceil(Math.random()*1000000000000000);
-        let newnotification = {
-            pid: props.postcontent.pid,
-            nid: "nid#"+id+props.postcontent.pid,
-            author: props.postcontent.uname,
-            uname: props.user.name,
-            date: today,
-            time: currenttime,
-            type: "comment",
-        }
-        storeDataJSON("nid#"+id+props.postcontent.pid, newnotification);
-        console.log(newnotification);
-        setCommentno(Commentno+1); 
+            temp_comments = props.data.comments;
+            temp_comments.push(comment);
+            console.log(temp_comments);
+            firebase
+            .firestore()
+            .collection('posts')
+            .doc(props.postID)
+            .update({ 
+              
+              comments : temp_comments,
+              
+            })
 
         
         }
@@ -97,6 +77,7 @@ const WriteCommentComponent = (props) => {
     </View>
     </View>
   </Card>
+
   );
 };
 

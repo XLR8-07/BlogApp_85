@@ -10,8 +10,6 @@ import {
 } from "react-native-elements";
 import ShowPostComponent from "../components/ShowPostComponent";
 import { Entypo } from "@expo/vector-icons";
-import WritePostComponent from "../components/WritePostComponent";;
-import {getDataJSON, getAllindex} from '../functions/AsyncStorageFunctions';
 import { AuthContext } from "../providers/AuthProvider";
 import * as firebase from "firebase";
 import "firebase/firestore";
@@ -21,7 +19,9 @@ const HomeScreen = (props) => {
 
   const [Post, setPost]=useState([]);
   const [Render, setRender]=useState(false);
-  const input = React.createRef();
+
+  const [postBody , setPostBody] = useState('');
+  
   const getPost = async () =>{
     setRender(true);
     firebase
@@ -66,23 +66,21 @@ const HomeScreen = (props) => {
               icon: "lock-outline",
               color: "#fff",
               onPress: function () {
-                auth.setIsLoggedIn(false);``
+                auth.setIsLoggedIn(false);
                 auth.setCurrentUser({});
               },
             }}/>
 
-          
-          <Card>
-        <Input
-            ref={input}
-            placeholder="What's On Your Mind?"
-            leftIcon={<Entypo name="pencil" size={24} color="gray" />}
-            onChangeText={
-            function(currentinput){
-                    setPost(currentinput);
-            }
-        }
-        />
+            <Card>
+            <Input
+                placeholder="What's On Your Mind?"
+                leftIcon={<Entypo name="pencil" size={24} color="gray" />}
+                onChangeText={
+                function(currentinput){
+                        setPostBody(currentinput);
+                  }
+                }
+            />
         <Button title="Post" type="outline" onPress={
             function(){
                 firebase
@@ -90,7 +88,7 @@ const HomeScreen = (props) => {
                       .collection("posts")
                       .add({
                         userId: auth.CurrentUser.uid,
-                        body: Post,
+                        body: postBody,
                         author: auth.CurrentUser.displayName,
                         created_at: firebase.firestore.Timestamp.now(),
                         likes: [],
@@ -116,8 +114,7 @@ const HomeScreen = (props) => {
           refreshing={Render}
           renderItem={function({item}){
             return(
-              <ShowPostComponent body={item.data.body} user={item.data.author} link={props.navigation} created_at={item.data.created_at.toDate().toLocaleDateString("en-US")} likecount={item.data.likes.length} id={item.id}
-              />
+              <ShowPostComponent data={item.data} postID={item.id} currentUser={auth.CurrentUser.displayName} props={props}/>
             );
           }}
           keyExtractor={(item, index) => index.toString()}

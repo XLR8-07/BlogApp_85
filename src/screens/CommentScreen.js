@@ -6,61 +6,51 @@ import {
 
 import WriteCommentComponent from "../components/WriteCommentComponent";
 import ShowCommentComponent from "../components/ShowCommentComponent";
-import {getDataJson, getAllindex} from '../functions/AsyncStorageFunctions';
 import { AuthContext } from "../providers/AuthProvider";
-import * as  firebase from "firebase";
+import * as firebase from "firebase";
 import "firebase/firestore";
 
 
 const CommentScreen = (props) => {
-  const content=props.route.params.content;
-
+  console.log(props);
   const [Comment, setComment]=useState([]);
   const [Render, setRender]=useState(false);
+
+  
   const getComment = async () =>{
     setRender(true);
-    
-    firebase
-    .firestore()
-    .collection('posts')
-    .doc(props.id)
-    .get()
-    .then((querySnapShot)=>{
+    setComment(props.route.params.data.comments);
+    console.log(Comment);
+    if(Comment.length == 0){
+      setRender(false);
+      alert("No Comment on this post!");
+    }
+    else{
       let temp_comments = [];
-      querySnapShot.forEach((doc)=>{
-        temp_comments.push({
-          id : doc.id,
-          data : doc.data
+      firebase
+      .firestore()
+      .collection('posts')
+      .doc(props.route.params.postID)
+      .get()
+      .then(snapshot =>{
+        console.log(snapshot);
+        snapshot.forEach(doc =>{
+          const data = doc.data();
+          console.log(data);
+          setRender(false);
         });
-      });
-      setComment(temp_comments); 
-      setRender(false);
-    })
-    .catch((error)=>{
-      setRender(false);
-      alert(error);
-
-    })
-    // let keys=await getAllindex();
-    // let Allcomments=[];
-    // if(keys!=null){
-    //   for (let k of keys){
-    //       if(k.startsWith("cid#") && k.endsWith(content.pid)){
-    //         let comments= await getDataJson(k);
-    //         Allcomments.push(comments);
-    //       }
-    //     }
-    //     setComment(Allcomments);
-    //   }
-    //   else{
-    //     console.log("No post to show");
-    //   }
-    //   setRender(false);
+      })
+      .catch(error =>{
+        setRender(true);
+        console.log(error);
+      })
+    }
     }
 
-  useEffect(()=>{
-    getComment();
-  },[]);
+    useEffect(()=>{
+      getComment();
+    },[]);
+
 
   return (
     <AuthContext.Consumer>
@@ -86,15 +76,16 @@ const CommentScreen = (props) => {
             }}/>
  
 
-          <WriteCommentComponent user={auth.CurrentUser} postcontent={Comment}/>
+          <WriteCommentComponent user={props.route.params.currentUser} postID={props.route.params.postID} data={props.route.params.data}/>
 
           <FlatList
           data={Comment}
           onRefresh={getComment}
           refreshing={Render}
           renderItem={function({item}){
+            console.log(item);
             return(
-              <ShowCommentComponent title={item}
+              <ShowCommentComponent comment={item} 
               />
             );
           }}

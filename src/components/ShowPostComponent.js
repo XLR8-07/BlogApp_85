@@ -8,12 +8,10 @@ import * as firebase from "firebase";
 import "firebase/firestore";
 
 const ShowPostComponent = (props) => {
-  console.log(props);
-  // const [Like, setLike]=useState(props.title.likecount);
-  let like=" ("+props.like+")";
+  // console.log(props);
   const comment="Comment";
-  let today = new Date().toLocaleDateString();
-  let currenttime = new Date().toLocaleTimeString();
+
+  
   let likeArray = [];
   
   return (
@@ -31,73 +29,50 @@ const ShowPostComponent = (props) => {
           activeOpacity={1}
         />
         <Text h4Style={{ padding: 10 }} h4>
-          {props.user}
+          {props.data.author}
         </Text>
         </View>
         <Text h6Style={{ padding: 10}} h6 style={{alignSelf:"stretch",color:'gray'}}>
-          <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Posted at: </Text>{props.created_at}
+          <Text style={{fontWeight:"bold" ,fontStyle:"italic",color:'gray'}}>Posted at: </Text>{props.data.created_at.toDate().toDateString().toString()}
         </Text>
       <Text
         style={{
           paddingVertical: 10,
         }}
       >
-        {props.body}
+        {props.data.body}
       </Text>
       <Card.Divider />
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Button
           type="outline"
-          title={props.likecount} 
+          title={props.data.likes.length.toString()} 
           icon={<AntDesign name="heart" size={24} color="dodgerblue" />}
           onPress={
-           async function(){
-                likeArray.push(props.user);
+            function(){
+                likeArray.push(props.currentUser);
                 console.log("WORKING!");
                 firebase
                 .firestore()
                 .collection('posts')
-                .doc(props.id)
+                .doc(props.postID)
                 .update({
                   likes:likeArray
                 })
                 .then(()=>{
-                  console.log("LIKED BY"+props.user);
+                  
                 })
                 .catch((error)=>{
                   alert(error);
                 });
-                // let lcount=(Like+1)
-                // await mergeData(props.title.pid,JSON.stringify({likecount: lcount}))
-                // const id=Math.ceil(Math.random()*1000000000000000);
-                // let newnotification = {
-                //     pid: props.title.pid,
-                //     nid: "nid#"+id+props.title.pid,
-                //     author: props.title.uname,
-                //     uname: props.user.name,
-                //     date: today,
-                //     time: currenttime,
-                //     type: "like",
-                // }
-                // storeDataJSON("nid#"+id+props.title.pid, newnotification);
-                // console.log(newnotification);
-                // console.log(props.title);
-                // setLike(Like+1);
               }
         }
         />
         <Button type="solid" title={comment} onPress={
           function(){
-            props.link.navigate('Comment',{content: props.title, id:props.id});
+            props.props.navigation.navigate('Comment',{data:props.data,currentUser:props.currentUser,postID:props.postID});
           }
         }/>
-
-        {/* <Button type="solid" title="Remove" onPress={
-          async function(){
-          await removeData((props.title.pid));
-          }
-        }/> */}
-
       </View>
     </Card>
   );
