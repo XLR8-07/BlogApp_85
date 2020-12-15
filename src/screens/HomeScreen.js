@@ -1,5 +1,5 @@
 import React, { useState ,useEffect} from "react";
-import {ImageBackground, SafeAreaView, ScrollView,TouchableOpacity, FlatList, View, StyleSheet } from "react-native";
+import { FlatList, View, StyleSheet } from "react-native";
 import {
   Card,
   Button,
@@ -38,10 +38,10 @@ const HomeScreen = (props) => {
         setPost(temp_posts);
         setRender(false);
       })
-      .catch((error) => {
+      ,(error) => {
         setRender(false);
         alert(error);
-      });
+      };
   }
 
   useEffect(()=>{
@@ -94,16 +94,14 @@ const HomeScreen = (props) => {
                         likes: [],
                         comments: [],
                       })
-                      .then(() => {
-                        // setLoading(false);
-                        alert("Post created Successfully!");
+                      .then((obj) => {
+                        setRender(false);
+                        alert("Post ID: " + obj.ZE.path.segments[1])
                       })
                       .catch((error) => {
-                        // setLoading(false);
+                        setRender(false);
                         alert(error);
                       });
-            // setPost("");
-            // input.current.clear(); 
             }
         } />
       </Card>

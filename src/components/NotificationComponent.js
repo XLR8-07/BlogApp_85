@@ -3,14 +3,8 @@ import { View,TouchableOpacity , FlatList} from "react-native";
 import { Card, Text, Avatar } from "react-native-elements";
 
 const NotificationComponent = (props) => {
-  console.log(props.content.data);
-  
-  let notation;
-  let bcolor;
-  let nm;
-  notation="Commented to";
-  bcolor="#ffab91";
-  nm="pencil";
+  // console.log(props.content.data);
+
   
   return (
     <TouchableOpacity onPress={function(){

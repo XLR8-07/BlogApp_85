@@ -2,8 +2,9 @@ import React, { useState,useEffect } from "react";
 import { View, ScrollView, StyleSheet, AsyncStorage,Image } from "react-native";
 import { Text, Card, Button, Avatar, Header,Input } from "react-native-elements";
 import { FontAwesome5 } from '@expo/vector-icons';
-import { mergeData} from '../functions/AsyncStorageFunctions';
 import { AuthContext } from "../providers/AuthProvider";
+import * as firebase from "firebase";
+import "firebase/firestore";
 
 const EditProfileScreen = (props) => { 
 const [Bornon, setBornon]=useState("");
@@ -69,13 +70,17 @@ const [Worksat, setWorksat]=useState("");
               icon={<FontAwesome5 name="user-edit" size={24} color="white" />}
               onPress={   
                 async function(){
-                await mergeData(auth.CurrentUser.email,JSON.stringify({
-                    bornon: Bornon,
-                    livesat: Livesat,
-                    worksat: Worksat,
-                }))
-                alert("Please logout first and then log in again to see the update :) ");
-                }
+                  firebase.firestore().collection("users").doc(auth.CurrentUser.uid).update({
+                    dateOfBirth: Bornon,
+                    address: Livesat,
+                    workPlace: Worksat,
+                  })
+                  .catch((error) => {
+                    //setLoading(false);
+                    alert(error);
+                  });
+                props.navigation.navigate('Profile');
+              }
             }
             />
 

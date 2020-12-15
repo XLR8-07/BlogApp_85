@@ -4,12 +4,20 @@ import {Input, Button, Card} from 'react-native-elements'
 import { Fontisto, AntDesign, Octicons, FontAwesome } from '@expo/vector-icons';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
+import Loading from '../components/Loading';
 
 const SignUpScreen = (props)=>{
     const [Name, setName] = useState("");
     const [SID, setSID] = useState("");
     const [Email, setEmail] = useState("");
     const [Password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    if(isLoading){
+      return (<Loading/>)
+    }
+    else{
+
     return(
         <View style={styles.viewStyle}>
             <Card>
@@ -50,36 +58,28 @@ const SignUpScreen = (props)=>{
                 type='outline'
                 onPress={() => {
                     if (Name && SID && Email && Password) {
-                    //   setIsLoading(true);
-                      firebase
-                        .auth()
-                        .createUserWithEmailAndPassword(Email, Password)
-                        .then((userCreds) => {
+                      setIsLoading(true);
+                      firebase.auth().createUserWithEmailAndPassword(Email, Password).then((userCreds) => {
                           userCreds.user.updateProfile({ displayName: Name });
-                          firebase
-                            .firestore()
-                            .collection("users")
-                            .doc(userCreds.user.uid)
-                            .set({
+                          firebase.firestore().collection("users").doc(userCreds.user.uid).set({
                               name: Name,
                               sid: SID,
                               email: Email,
                             })
                             .then(() => {
-                            //   setIsLoading(false);
-                              alert("Account created successfully!");
-                              console.log(userCreds.user);
+                              setIsLoading(false);
+                              alert("Account created successfully! \nUID: " + userCreds.user.uid);
                               props.navigation.navigate("SignIn");
                             })
-                            .catch((error) => {
-                            //   setIsLoading(false);
-                              alert(error);
-                            });
+                            ,(error1) => {
+                              setIsLoading(false);
+                              alert(error1);
+                            };
                         })
-                        .catch((error) => {
-                        //   setIsLoading(false);
-                          alert(error);
-                        });
+                        ,(error2) => {
+                          setIsLoading(false);
+                          alert(error2);
+                        };
                     } else {
                       alert("Fields can not be empty!");
                     }
@@ -99,6 +99,7 @@ const SignUpScreen = (props)=>{
             </Card>
         </View>
     )
+ }
 }
 
 const styles = StyleSheet.create({

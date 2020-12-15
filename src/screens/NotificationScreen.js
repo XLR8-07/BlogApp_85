@@ -1,7 +1,6 @@
 import React, { useState ,useEffect} from "react";
 import {ImageBackground, FlatList, View, StyleSheet } from "react-native";
 import { Header} from "react-native-elements";
-import {getDataJSON, getAllindex} from '../functions/AsyncStorageFunctions';
 import NotificationComponent from '../components/NotificationComponent';
 import { AuthContext } from "../providers/AuthProvider";
 import * as firebase from "firebase";
@@ -13,10 +12,7 @@ const NotificationScreen = (props) => {
 
   const getNotification = async () =>{
     setRender(true);
-    firebase
-      .firestore()
-      .collection("posts")
-      .onSnapshot((querySnapshot) => {
+    firebase.firestore().collection("posts").onSnapshot((querySnapshot) => {
         let temp_posts = [];
         querySnapshot.forEach((doc) => {
           temp_posts.push({
@@ -27,10 +23,10 @@ const NotificationScreen = (props) => {
         setNotification(temp_posts);
         setRender(false);
       })
-      .catch((error) => {
+      ,(error) => {
         setRender(false);
         alert(error);
-      });
+      };
   }
 
 

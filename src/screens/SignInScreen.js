@@ -42,18 +42,15 @@ const SignInScreen = (props)=>{
                             type='outline'
                             onPress={() => {
                                 setIsLoading(true);
-                                firebase
-                                  .auth()
-                                  .signInWithEmailAndPassword(Email, Password)
-                                  .then((userCreds) => {
+                                firebase.auth().signInWithEmailAndPassword(Email, Password).then((userCreds) => {
                                     setIsLoading(false);
                                     auth.setIsLoggedIn(true);
                                     auth.setCurrentUser(userCreds.user);
                                   })
-                                  .catch((error) => {
+                                  ,(error) => {
                                     setIsLoading(false);
                                     alert(error);
-                                  });
+                                  };
                               }}
                         />
                         <Button
