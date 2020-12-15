@@ -1,7 +1,6 @@
 import React from "react";
 import { View,TouchableOpacity , FlatList} from "react-native";
 import { Card, Text, Avatar } from "react-native-elements";
-import {getDataJSON} from '../functions/AsyncStorageFunctions';
 
 const NotificationComponent = (props) => {
   console.log(props.content.data);

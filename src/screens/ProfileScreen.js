@@ -1,14 +1,65 @@
-import React from "react";
-import { View, StyleSheet, AsyncStorage, Image } from "react-native";
+import React,{ useState, useEffect } from "react";
+import { View, StyleSheet, AsyncStorage, Image,FlatList } from "react-native";
 import { Text, Card, Button, Avatar, Header } from "react-native-elements";
 import { FontAwesome5 } from '@expo/vector-icons';
 import { AuthContext } from "../providers/AuthProvider";
 import { AntDesign } from '@expo/vector-icons';
+import ShowPostComponent from "../components/ShowPostComponent";
+import * as firebase from "firebase";
+import "firebase/firestore";
 
-import { removeData } from '../functions/AsyncStorageFunctions';
 
 
 const ProfileScreen = (props) => {
+
+    const [Posts,setPosts] = useState([]);
+    const [Profiles,setProfiles] = useState([]);
+    const [Render , setRender] = useState(false); 
+
+    const getData = async() =>{
+        firebase.firestore().collection("users").onSnapshot((querySnapshot) => {
+            let temp_users = [];
+            querySnapshot.forEach((doc) => {
+                temp_users.push({
+                    id: doc.id,
+                    data: doc.data(),
+                });
+        });
+        setProfiles(temp_users);
+        //setLoading(false);
+      }
+        , (error) => {
+          //setLoading(false);
+          alert(error);
+        });
+    }
+
+    const getPost = async() =>{
+        firebase
+      .firestore()
+      .collection("posts")
+      .orderBy("posted_at", "desc")
+      .onSnapshot((querySnapshot) => {
+        let temp_users = [];
+        querySnapshot.forEach((doc) => {
+          temp_users.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+        setPosts(temp_users);
+        //setLoading(false);
+      }
+        , (error) => {
+          //setLoading(false);
+          alert(error);
+        });
+    }
+
+    useEffect(()=>{
+        getPost();
+        getData();
+    },[])
     return (
         <AuthContext.Consumer>
             {(auth) => (
@@ -33,14 +84,14 @@ const ProfileScreen = (props) => {
                     />
                     <Card>
                         <Image style={styles.profImage} source={require('../../assets/profilePhoto.png')} />
-                        <Text style={styles.userNameStyle}>{auth.CurrentUser.name}</Text>
+                        <Text style={styles.userNameStyle}>{auth.CurrentUser.displayName}</Text>
                         <Button
                             type="solid"
                             title=" Edit Account "
                             icon={<FontAwesome5 name="user-edit" size={24} color="white" />}
                             onPress={
                                 function(){
-                                    props.navigation.navigate('EditProfile');
+                                    props.navigation.navigate('EditProfile',{title:auth.CurrentUser});
                                 }
                             }
                         />
@@ -48,16 +99,52 @@ const ProfileScreen = (props) => {
                             icon={<AntDesign name="deleteuser" size={24} color="white" />}
                             title=" Delete Profile"
                             onPress={async function () {
-                                await removeData(auth.CurrentUser.email);
-                                alert("Account has been deleted!");
-                                auth.setCurrentUser({});
-                                auth.setIsLoggedIn(false);
-                            }}
+                                firebase.auth().deleteUser(auth.CurrentUser.uid).then(() => {
+                                    console.log('Successfully deleted user');
+                                    auth.setIsloggedIn(false);
+                                    auth.setCurrentUser({});
+                                }).catch((error) => {
+                                    console.log('Error deleting user:', error);
+                                  });
+                                }
+                            }
                         />
-                        <Text style={styles.textStyle}>Born on: {auth.CurrentUser.dateOfBirth}</Text>
-                        <Text style={styles.textStyle}>Address: {auth.CurrentUser.address}</Text>
-                        <Text style={styles.textStyle}>Works at: {auth.CurrentUser.workPlace}</Text>
+                        <FlatList
+                            data={Profiles}
+                            renderItem={function ({ item }) {
+                            console.log(item);
+                            if (auth.CurrentUser.uid == item.id) {
+                                return (
+                                <View>
+                                    <Text style={styles.textStyle1}>  Born On :  {item.data.dateOfBirth}</Text>
+                                    <Text style={styles.textStyle1}>  Lives At :  {item.data.address}</Text>
+                                    <Text style={styles.textStyle1}>  Works At :  {item.data.workPlace}</Text>
+                                </View>
+                    );
+                  }
+                }}
+              />
                     </Card>
+                    <Card>
+                        <Text style={{ fontSize: 18, color: 'dodgerblue', textAlign: 'center' }}>↓ ↓ ↓ Your Posts ↓ ↓ ↓</Text>
+                    </Card>
+
+                    <FlatList
+                        data={Posts}
+                        onRefresh={getPost}
+                        refreshing={Render}
+                        renderItem={function ({ item }) {
+                
+                            console.log(item);
+                            if (item.data.userId == auth.CurrentUser.uid) {
+                            return (
+                                <ShowPostComponent data={item.data} postID={item.id} currentUser={auth.CurrentUser.displayName} props={props} />
+                            );
+                            }
+                        }}
+                    keyExtractor={(item, index) => index.toString()}
+                    >
+                    </FlatList>
                 </View>
             )}
         </AuthContext.Consumer>
