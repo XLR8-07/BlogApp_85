@@ -11,9 +11,6 @@ const ShowPostComponent = (props) => {
   const [Like, setLike] = useState(props.data.likes.length);
   let like = " (" + Like + ")";
   const comment="Comment";
-
-  
-  let likeArray = [];
   
   return (
     <Card>

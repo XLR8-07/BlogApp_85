@@ -4,27 +4,33 @@ import { Header} from "react-native-elements";
 import {getDataJSON, getAllindex} from '../functions/AsyncStorageFunctions';
 import NotificationComponent from '../components/NotificationComponent';
 import { AuthContext } from "../providers/AuthProvider";
+import * as firebase from "firebase";
+import "firebase/firestore";
 
 const NotificationScreen = (props) => {
   const [Notification, setNotification]=useState([]);
   const [Render, setRender]=useState(false);
+
   const getNotification = async () =>{
     setRender(true);
-    let keys=await getAllindex();
-    let Allnotifications=[];
-    if(keys!=null){
-     for (let k of keys){
-          if(k.startsWith("nid#") ){
-            let notification= await getDataJSON(k);
-            Allnotifications.push(notification);
-          }
-        }
-        setNotification(Allnotifications);
-       }
-      else{
-        console.log("No post to show");
-      }
-       setRender(false);
+    firebase
+      .firestore()
+      .collection("posts")
+      .onSnapshot((querySnapshot) => {
+        let temp_posts = [];
+        querySnapshot.forEach((doc) => {
+          temp_posts.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+        setNotification(temp_posts);
+        setRender(false);
+      })
+      .catch((error) => {
+        setRender(false);
+        alert(error);
+      });
   }
 
 
@@ -49,7 +55,7 @@ const NotificationScreen = (props) => {
               icon: "lock-outline",
               color: "#fff",
               onPress: function () {
-                auth.setIsloggedIn(false);
+                auth.setIsLoggedIn(false);
                 auth.setCurrentUser({});
               },
             }}/>
@@ -59,9 +65,9 @@ const NotificationScreen = (props) => {
           onRefresh={getNotification}
           refreshing={Render}
           renderItem={function({item}){
-            if(item.author==auth.CurrentUser.name){
-            return(
-                  <NotificationComponent title={item} link={props.navigation}/>
+            if(item.data.author==auth.CurrentUser.displayName){
+              return(
+                  <NotificationComponent content={item} link={props.navigation} likes={item.data.likes} comments={item.data.comments} currentUser={auth.CurrentUser.displayName}/>
             );}
           }}
           keyExtractor={(item, index) => index.toString()}
